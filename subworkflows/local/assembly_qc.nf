@@ -2,6 +2,7 @@
 include { CHECKM_LINEAGEWF } from '../../modules/nf-core/checkm/lineagewf'
 include { BUSCO } from '../../modules/nf-core/busco'
 include { QUAST } from '../../modules/nf-core/quast'
+include { SEQTK_SUBSEQ } from '../modules/nf-core/seqtk/subseq/main'
 
 workflow ASSEMBLY_QC {
     take:
