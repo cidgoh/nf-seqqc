@@ -18,12 +18,14 @@ process FILTER_ASSEMBLY_LENGTH {
     """
     #!/bin/bash
     awk -v min_length=${params.min_length} -v max_length=${params.max_length} \
-        'BEGIN {FS="\\n"; RS=">"; ORS=""} \
+        'BEGIN {FS="\\n"; RS=">"; ORS=""; min_filtered_length="inf"; max_filtered_length=0} \
         NR > 1 { \
             seq = substr(\$0, index(\$0, "\\n") + 1); \
             seq_length = length(seq) - gsub("\\n", "", seq); \
             if (seq_length >= min_length && seq_length <= max_length) { \
                 print ">"\$0; \
+                if (seq_length < min_filtered_length) {min_filtered_length = seq_length;} \
+                if (seq_length > max_filtered_length) {max_filtered_length = seq_length;} \
             } \
         }' ${assembly} > filtered_assembly.fasta
 
