@@ -1,4 +1,4 @@
-include { SEQTK_SUBSEQ } from '../modules/nf-core/seqtk/subseq/main'
+include { SEQTK_SUBSEQ } from '../../modules/nf-core/seqtk/subseq/main'
 
 params.min_length = 0 // default value
 params.max_length = Integer.MAX_VALUE // default value
@@ -16,14 +16,18 @@ process FILTER_ASSEMBLY_LENGTH {
 
     script:
     """
-    # Using awk to filter assembly based on length
-    awk -v min_length=${params.min_length} -v max_length=${params.max_length} \\
-        '/^>/ {if (n>=min_length && n<=max_length) print seq; seq=$0; n=0; next;} {seq=seq "\\n" \$0; n+=length(\$0);} \\
-        END {if (n>=min_length && n<=max_length) print seq;}' \\
-        ${assembly} > assembly_filtered.fasta
+    #!/bin/bash
+    awk -v min_length=${params.min_length} -v max_length=${params.max_length} \
+        'BEGIN {FS="\\n"; RS=">"; ORS=""} \
+        NR > 1 { \
+            seq = substr(\$0, index(\$0, "\\n") + 1); \
+            seq_length = length(seq) - gsub("\\n", "", seq); \
+            if (seq_length >= min_length && seq_length <= max_length) { \
+                print ">"\$0; \
+            } \
+        }' ${assembly} > filtered_assembly.fasta
 
-    # Now, use the seqtk_seq module to format the filtered assembly
-    SEQTK_SEQ(assembly_filtered.fasta)
+    SEQTK_SEQ(filtered_assembly.fasta)
     """
 }
 
