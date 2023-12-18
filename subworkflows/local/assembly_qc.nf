@@ -2,7 +2,7 @@
 include { CHECKM_LINEAGEWF } from '../../modules/nf-core/checkm/lineagewf'
 include { BUSCO } from '../../modules/nf-core/busco'
 include { QUAST } from '../../modules/nf-core/quast'
-include { SEQTK_SUBSEQ } from '../modules/nf-core/seqtk/subseq/main'
+include { FILTER_ASSEMBLY_LENGTH } from '../../modules/local/filter_assembly_length'
 
 workflow ASSEMBLY_QC {
     take:
@@ -61,6 +61,17 @@ workflow ASSEMBLY_QC {
         quast_tsv = []
     }
 
+    // FILTER ASSEMBLY BASED ON LENGTH (Optional Step)
+    if (!params.skip_length_filter) {
+        FILTER_ASSEMBLY_LENGTH(
+            assembly.map{ it[1] },
+            params.min_length,
+            params.max_length
+        )
+        filtered_assembly = FILTER_ASSEMBLY_LENGTH.out.filtered_assembly
+        assembly = filtered_assembly
+    }
+
     // RUN BUSCO
     if (!params.skip_busco) {
         BUSCO(
@@ -98,5 +109,6 @@ workflow ASSEMBLY_QC {
     busco_short_summaries_json = busco_short_summaries_json
     busco_dir = busco_dir
     busco_versions = busco_versions
-
+    // FILTER OUTPUT (optional)
+    assembly = params.skip_length_filter ? assembly.map{ it[1] } : assembly
 }
