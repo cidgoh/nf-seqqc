@@ -1,7 +1,7 @@
 include { SEQTK_SUBSEQ } from '../../modules/nf-core/seqtk/subseq/main'
 
-params.min_length = 0 // default value
-params.max_length = Integer.MAX_VALUE // default value
+// params.min_length = 0 // default value
+// params.max_length = Integer.MAX_VALUE // default value
 
 process FILTER_ASSEMBLY_LENGTH {
 
